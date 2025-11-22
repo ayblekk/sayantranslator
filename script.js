@@ -10,7 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copy-btn');
     const toast = document.getElementById('toast');
 
-    const apiKey = 'YOUR_API_KEY_HERE'; // TODO: Replace with your actual Perplexity API key
+    const apiKeyInput = document.getElementById('api-key-input');
+
+    // Load saved API key
+    const savedKey = localStorage.getItem('perplexity_api_key');
+    if (savedKey) {
+        apiKeyInput.value = savedKey;
+    }
+
+    // Save API key on change
+    apiKeyInput.addEventListener('input', (e) => {
+        localStorage.setItem('perplexity_api_key', e.target.value.trim());
+    });
+
+    function getApiKey() {
+        return apiKeyInput.value.trim();
+    }
 
     // Auto-resize Textarea
     function autoResize(element) {
@@ -27,7 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                headers: {
+                    'Authorization': `Bearer ${getApiKey()}`,
+                    'Content-Type': 'application/json'
+                },
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -58,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleTranslation() {
         const text = sourceText.value.trim();
         if (!text) return;
+
+        const currentKey = getApiKey();
+        if (!currentKey) {
+            alert('Please enter your Perplexity API Key in the top right corner.');
+            return;
+        }
 
         // UI State: Loading
         translateBtn.disabled = true;
